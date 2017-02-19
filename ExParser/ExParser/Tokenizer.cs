@@ -1,31 +1,7 @@
 ﻿using System.Linq;
 
 namespace ExParser {
-    enum TokenType {
-        Error,
-        Number,
-        Label,
-        LParen, RParen, Comma,
-        AddOp, SubOp, MultOp, DivOp, PowOp
-    }
-    class Token {
-        public static readonly Token LParen = new Token("(", TokenType.LParen);
-        public static readonly Token RParen = new Token(")", TokenType.RParen);
-        public static readonly Token Comma = new Token(",", TokenType.Comma);
-        public static readonly Token AddOp = new Token("+", TokenType.AddOp);
-        public static readonly Token SubOp = new Token("-", TokenType.SubOp);
-        public static readonly Token MultOp = new Token("*", TokenType.MultOp);
-        public static readonly Token DivOp = new Token("/", TokenType.DivOp);
-        public static readonly Token PowOp = new Token("^", TokenType.PowOp);
-        public string Lexeme { get; private set; }
-        public TokenType Type { get; private set; }
-
-        public Token(string lexeme, TokenType type) {
-            Lexeme = lexeme;
-            Type = type;
-        }
-    }
-    class Tokenizer {
+    class Tokenizer : ITokenReader {
         static readonly string OperatorChars = "(),+-*/^";
         string s;
         int i;
@@ -45,23 +21,24 @@ namespace ExParser {
             
             while (!EOF()) { // skip all the white space
                 if (char.IsWhiteSpace(s, i)) i++;
+                else break;
             }
             if (EOF()) return null; // return null if EOF
 
             char c = s[i];
             switch (c) { // check if the token is a single-char operator
-                case '(': return Token.LParen;
-                case ')': return Token.RParen;
-                case ',': return Token.Comma;
-                case '+': return Token.AddOp;
-                case '-': return Token.SubOp;
-                case '*': return Token.MultOp;
-                case '/': return Token.DivOp;
-                case '^': return Token.PowOp;
+                case '(': i++; return Token.LParen;
+                case ')': i++; return Token.RParen;
+                case ',': i++; return Token.Comma;
+                case '+': i++; return Token.AddOp;
+                case '-': i++; return Token.SubOp;
+                case '*': i++; return Token.MultOp;
+                case '/': i++; return Token.DivOp;
+                case '^': i++; return Token.PowOp;
             }
 
             // at this point, the token is either a number or a label
-            if (char.IsDigit(s, i)) { // is it a number?
+            if (s[i] == '.' || char.IsDigit(s, i)) { // is it a number?
                 int start = i;
                 do {
                     i++;
