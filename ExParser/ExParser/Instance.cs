@@ -34,11 +34,17 @@ namespace ExParser {
                         List<Token> tokens = new List<Token>();
                         int level = 1;
                         while ((tok = tknr.GetToken()) != null) { // get the tokens within the parenthesis
-                            if (tok.Type == TokenType.RParen) {
+                            if (tok.Type == TokenType.LParen) {
+                                level += 1;
+                            } else if (tok.Type == TokenType.RParen) {
                                 level -= 1;
                                 if (level == 0) break;
                             }
                             tokens.Add(tok); // add them to the token buffer
+                        }
+
+                        if (level != 0) {
+                            throw new NotImplementedException("End of parenthesis was not met.");
                         }
 
                         // evaluate the token buffer recursively
@@ -58,11 +64,64 @@ namespace ExParser {
                         string name = tok.Lexeme;
                         double value;
                         if ((tok = tknr.PeekToken()) != null && tok.Type == TokenType.LParen) { // function call
+                            tknr.GetToken(); // get the left paren out of the way
 
+                            List<double> paramNumbers = new List<double>();
+
+                            // since this is a function call, all the arguments have to be evaluated, one by one
+                            bool endArgs = false;
+                            do {
+                                List<Token> tokens = new List<Token>();
+
+                                int level = 0;
+                                bool commaMet = false;
+                                while ((tok = tknr.GetToken()) != null) { // get the tokens in the current argument
+                                    if (tok.Type == TokenType.LParen) {
+                                        level += 1;
+                                    } else if (tok.Type == TokenType.RParen) {
+                                        if (level == 0) {
+                                            endArgs = commaMet = true;
+                                            break;
+                                        }
+                                        level -= 1;
+                                    } else if (level == 0 && tok.Type == TokenType.Comma) {
+                                        // end of the current argument, since the comma was hit
+                                        commaMet = true;
+                                        break;
+                                    }
+                                    tokens.Add(tok); // add them to the token buffer
+                                }
+
+                                if (level != 0 || commaMet == false) {
+                                    throw new NotImplementedException("End of argument (comma) was not met.");
+                                }
+
+                                if (tokens.Count > 0) {
+                                    // last read token was a comma
+                                    // evaluate the current argument and put it into the parameters list
+                                    // evaluate the token buffer
+                                    double res = Evaluate(new TokenBuffer(tokens));
+                                    // add result to numbers list
+                                    paramNumbers.Add(res);
+                                } else if (paramNumbers.Count > 0) {
+                                    throw new NotImplementedException("Empty parameter is not allowed.");
+                                }
+
+                            } while (!endArgs);
+
+                            Func<double[], double> func;
+                            if (Functions.TryGetValue(name, out func)) {
+                                // evaluate the token buffer
+                                double res = func(paramNumbers.ToArray());
+                                // add result to numbers list
+                                numbers.Add(res);
+                            } else {
+                                throw new NotImplementedException("Function \"" + name + "\" does not exist.");
+                            }
                         } else if (Constants.TryGetValue(name, out value)) { // constant
                             numbers.Add(value);
                         } else { // constant, but it doesn't exist in the constant map
-                            throw new NotImplementedException("Constant does not exist.");
+                            throw new NotImplementedException("Constant \"" + name + "\" does not exist.");
                         }
                     }
                     break;
@@ -130,6 +189,75 @@ namespace ExParser {
                 if (list[i].Equals(first) || list[i].Equals(second)) return i;
             }
             return -1;
+        }
+
+        public static Instance CreateScientificInstance() {
+            Instance ins = new Instance();
+
+            // Simple functions
+            ins.Functions.Add("abs", (args) => {
+                if (args.Length == 1) return Math.Abs(args[0]);
+                else throw new ArgumentOutOfRangeException("args", "This function requires exactly one argument.");
+            });
+            ins.Functions.Add("ceiling", (args) => {
+                if (args.Length == 1) return Math.Ceiling(args[0]);
+                else throw new ArgumentOutOfRangeException("args", "This function requires exactly one argument.");
+            });
+            ins.Functions.Add("floor", (args) => {
+                if (args.Length == 1) return Math.Floor(args[0]);
+                else throw new ArgumentOutOfRangeException("args", "This function requires exactly one argument.");
+            });
+            ins.Functions.Add("round", (args) => {
+                if (args.Length == 1) return Math.Round(args[0]);
+                else if (args.Length == 2) return Math.Round(args[0], (int)args[1]);
+                else throw new ArgumentOutOfRangeException("args", "This function requires one or two arguments.");
+            });
+            ins.Functions.Add("rem", (args) => {
+                if (args.Length == 1) return args[0] % args[1];
+                else throw new ArgumentOutOfRangeException("args", "This function requires two arguments.");
+            });
+            ins.Functions.Add("truncate", (args) => {
+                if (args.Length == 1) return Math.Truncate(args[0]);
+                else throw new ArgumentOutOfRangeException("args", "This function requires exactly one argument.");
+            });
+
+            // Trig functions
+            ins.Functions.Add("sin", (args) => {
+                if (args.Length == 1) return Math.Sin(args[0]);
+                else throw new ArgumentOutOfRangeException("args", "This function requires exactly one argument.");
+            });
+            ins.Functions.Add("cos", (args) => {
+                if (args.Length == 1) return Math.Cos(args[0]);
+                else throw new ArgumentOutOfRangeException("args", "This function requires exactly one argument.");
+            });
+            ins.Functions.Add("tan", (args) => {
+                if (args.Length == 1) return Math.Tan(args[0]);
+                else throw new ArgumentOutOfRangeException("args", "This function requires exactly one argument.");
+            });
+
+            // Inverse trig functions
+            ins.Functions.Add("asin", (args) => {
+                if (args.Length == 1) return Math.Asin(args[0]);
+                else throw new ArgumentOutOfRangeException("args", "This function requires exactly one argument.");
+            });
+            ins.Functions.Add("acos", (args) => {
+                if (args.Length == 1) return Math.Acos(args[0]);
+                else throw new ArgumentOutOfRangeException("args", "This function requires exactly one argument.");
+            });
+            ins.Functions.Add("atan", (args) => {
+                if (args.Length == 1) return Math.Atan(args[0]);
+                else throw new ArgumentOutOfRangeException("args", "This function requires exactly one argument.");
+            });
+            ins.Functions.Add("atan2", (args) => {
+                if (args.Length == 2) return Math.Atan2(args[0], args[1]);
+                else throw new ArgumentOutOfRangeException("args", "This function requires two arguments.");
+            });
+
+            // Constants
+            ins.Constants.Add("E", Math.E);
+            ins.Constants.Add("PI", Math.PI);
+
+            return ins;
         }
     }
 }
