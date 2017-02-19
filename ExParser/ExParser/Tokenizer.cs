@@ -50,7 +50,7 @@ namespace ExParser {
                 int start = i;
                 do {
                     i++;
-                } while (!EOF() && !OperatorChars.Contains(s[i])); // check that it's not an operator
+                } while (!EOF() && !OperatorChars.Contains(s[i]) && !char.IsWhiteSpace(s, i)); // check that it's not an operator or whitespace
                 int len = i - start;
                 return new Token(s.Substring(start, len), TokenType.Label);
                 // Label ::= [^0-9\(\)\+-\*/\^][^\(\)\+-\*/\^]*

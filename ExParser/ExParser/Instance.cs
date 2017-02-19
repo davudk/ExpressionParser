@@ -220,6 +220,10 @@ namespace ExParser {
                 if (args.Length == 1) return Math.Truncate(args[0]);
                 else throw new ArgumentOutOfRangeException("args", "This function requires exactly one argument.");
             });
+            ins.Functions.Add("sqrt", (args) => {
+                if (args.Length == 1) return Math.Sqrt(args[0]);
+                else throw new ArgumentOutOfRangeException("args", "This function requires exactly one argument.");
+            });
 
             // Trig functions
             ins.Functions.Add("sin", (args) => {
