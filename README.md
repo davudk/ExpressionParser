@@ -6,54 +6,41 @@ A relatively simple expression parser for C# that supports variables and functio
 ```
 using ExParser;
 using System;
+...
 
-class Program {
-
-  static void Main(string[] args) {
-    Instance instance = new Instance();
-    double result = instance.Evaluate("2 + ( 3 * 4 )"); // hint: spacing is not needed
-    Console.WriteLine("The result is: " + result;
-  }
-}
+Instance instance = new Instance();
+double result = instance.Evaluate("2 + ( 3 * 4 )"); // hint: spacing is not needed
+Console.WriteLine("The result is: " + result;
 ```
 ##### (Ex 2) Adding custom functions and constants
 ```
 using ExParser;
 using System;
+...
 
-class Program {
+Instance instance = new Instance();
 
-    static void Main(string[] args) {
-        Instance instance = new Instance();
+instance.Functions.Add("count", (d) => d.Length);
 
-        instance.Functions.Add("count", (d) => d.Length);
+instance.Functions.Add("sin", (d) => {
+	if (d.Length == 1) return Math.Sin(d[0]);
+	else throw new ArgumentException("The sin function requires exactly one parameter.");
+});
 
-        instance.Functions.Add("sin", (d) => {
-            if (d.Length == 1) return Math.Sin(d[0]);
-            else throw new ArgumentException("The sin function requires exactly one parameter.");
-        });
+instance.Constants.Add("PI", Math.PI);
 
-        instance.Constants.Add("PI", Math.PI);
-
-        double result = instance.Evaluate("sin(PI / 4)"); // 0.707* which is sqrt(2) / 2
-        Console.WriteLine("The result is: " + result);
-    }
-}
+double result = instance.Evaluate("sin(PI / 4)"); // 0.707* which is sqrt(2) / 2
+Console.WriteLine("The result is: " + result);
 ```
 ##### (Ex 3) Using the built-in scientific instance
 ```
 using ExParser;
 using System;
+...
 
-class Program {
-
-    static void Main(string[] args) {
-        Instance instance = Instance.CreateScientificInstance();
-
-        double result = instance.Evaluate("atan2(sqrt(3), 1) / PI * 180"); // 60
-        Console.WriteLine("The result is: " + result);
-    }
-}
+Instance instance = Instance.CreateScientificInstance();
+double result = instance.Evaluate("atan2(sqrt(3), 1) / PI * 180"); // 60
+Console.WriteLine("The result is: " + result);
 ```
 The scientific instance contains the standard math functions:
 **abs, ceiling, floor, round, rem, trunc, sqrt, sin, cos, tan, asin, acos, atan, atan2**, and of course the constants **PI** and **E**.
