@@ -3,7 +3,7 @@ A relatively simple expression parser for C# that supports variables and functio
 
 ### Examples
 ##### (Ex 1) Simple expression evaluation
-```
+```C#
 using ExParser;
 using System;
 ...
@@ -13,7 +13,7 @@ double result = instance.Evaluate("2 + ( 3 * 4 )"); // hint: spacing is not need
 Console.WriteLine("The result is: " + result;
 ```
 ##### (Ex 2) Adding custom functions and constants
-```
+```C#
 using ExParser;
 using System;
 ...
@@ -33,7 +33,7 @@ double result = instance.Evaluate("sin(PI / 4)"); // 0.707* which is sqrt(2) / 2
 Console.WriteLine("The result is: " + result);
 ```
 ##### (Ex 3) Using the built-in scientific instance
-```
+```C#
 using ExParser;
 using System;
 ...
