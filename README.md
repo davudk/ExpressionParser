@@ -1,5 +1,5 @@
 # ExpressionParser
-A relatively simple expression parser for C# that supports variables and functions.
+An expression parser for C# that supports variables and functions.
 
 ### Examples
 ##### (Ex 1) Simple expression evaluation
