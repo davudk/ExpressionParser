@@ -9,8 +9,8 @@ using System;
 ...
 
 Instance instance = new Instance();
-double result = instance.Evaluate("2 + ( 3 * 4 )"); // hint: spacing is not needed
-Console.WriteLine("The result is: " + result;
+double result = instance.Evaluate("2 + ( 3 * 4 )");
+Console.WriteLine("The result is: " + result);
 ```
 ##### (Ex 2) Adding custom functions and constants
 ```C#
@@ -29,7 +29,7 @@ instance.Functions.Add("sin", (d) => {
 
 instance.Constants.Add("PI", Math.PI);
 
-double result = instance.Evaluate("sin(PI / 4)"); // 0.707* which is sqrt(2) / 2
+double result = instance.Evaluate("sin(PI / 4)"); // 0.707... = sqrt(2) / 2
 Console.WriteLine("The result is: " + result);
 ```
 ##### (Ex 3) Using the built-in scientific instance
