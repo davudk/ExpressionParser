@@ -49,7 +49,7 @@ Instance instance = new Instance {
 Func<string, double> eval = instance.Evaluate;
 
 // because the name ABC does not exist,
-// the function EvalConst in called (defined above)
+// the function EvalConst is called (defined above)
 Console.WriteLine("Result: " + eval("ABC")); // ABC is 65+66+67=198
 ```
 The scientific instance contains the standard math functions:
