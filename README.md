@@ -14,10 +14,6 @@ Console.WriteLine("The result is: " + result);
 ```
 ##### (Ex 2) Adding custom functions and constants
 ```C#
-using ExParser;
-using System;
-...
-
 Instance instance = new Instance();
 
 instance.Functions.Add("count", (d) => d.Length);
@@ -34,10 +30,6 @@ Console.WriteLine("The result is: " + result);
 ```
 ##### (Ex 3) Using the built-in scientific instance
 ```C#
-using ExParser;
-using System;
-...
-
 Instance instance = Instance.CreateScientificInstance();
 double result = instance.Evaluate("atan2(sqrt(3), 1) / PI * 180"); // 60
 Console.WriteLine("The result is: " + result);
