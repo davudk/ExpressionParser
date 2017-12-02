@@ -2,12 +2,17 @@
 using System.Collections.Generic;
 
 namespace ExParser {
+    public delegate double ExFunc(params double[] args);
+    public delegate double? EvalConst(string name);
+    public delegate double? EvalFunc(string name, double[] args);
     public class Instance {
-        public Dictionary<string, Func<double[], double>> Functions { get; private set; }
+        public Dictionary<string, ExFunc> Functions { get; private set; }
         public Dictionary<string, double> Constants { get; private set; }
+        public EvalConst EvalConst { get; set; }
+        public EvalFunc EvalFunc { get; set; }
 
         public Instance() {
-            Functions = new Dictionary<string, Func<double[], double>>();
+            Functions = new Dictionary<string, ExFunc>();
             Constants = new Dictionary<string, double>();
         }
 
@@ -18,13 +23,17 @@ namespace ExParser {
             List<double> numbers = new List<double>();
             List<TokenType> operators = new List<TokenType>();
 
+            bool makeNegative = false;
             Token tok;
             while ((tok = tknr.GetToken()) != null) {
                 switch (tok.Type) {
                 case TokenType.Number: {
-                        double value;
-                        if (double.TryParse(tok.Lexeme, out value)) {
+                        if (double.TryParse(tok.Lexeme, out var value)) {
+                            if (makeNegative) {
+                                value *= -1;
+                            }
                             numbers.Add(value);
+                            makeNegative = false;
                         } else {
                             throw new NotImplementedException("Unable to parse double.");
                         }
@@ -53,8 +62,14 @@ namespace ExParser {
                         numbers.Add(res);
                     }
                     break;
-                case TokenType.AddOp:
                 case TokenType.SubOp:
+                    if (operators.Count == numbers.Count) {
+                        makeNegative = true;
+                    } else {
+                        operators.Add(tok.Type);
+                    }
+                    break;
+                case TokenType.AddOp:
                 case TokenType.MultOp:
                 case TokenType.DivOp:
                 case TokenType.PowOp:
@@ -62,7 +77,7 @@ namespace ExParser {
                     break;
                 case TokenType.Label: { // either a constant or a function call
                         string name = tok.Lexeme;
-                        double value;
+                        double? final;
                         if ((tok = tknr.PeekToken()) != null && tok.Type == TokenType.LParen) { // function call
                             tknr.GetToken(); // get the left paren out of the way
 
@@ -109,17 +124,20 @@ namespace ExParser {
 
                             } while (!endArgs);
 
-                            Func<double[], double> func;
-                            if (Functions.TryGetValue(name, out func)) {
+                            if (Functions.TryGetValue(name, out var func)) { // retrieve
                                 // evaluate the token buffer
                                 double res = func(paramNumbers.ToArray());
                                 // add result to numbers list
                                 numbers.Add(res);
+                            } else if ((final = EvalFunc?.Invoke(name, paramNumbers.ToArray())).HasValue) { // eval function
+                                numbers.Add(final.Value);
                             } else {
                                 throw new NotImplementedException("Function \"" + name + "\" does not exist.");
                             }
-                        } else if (Constants.TryGetValue(name, out value)) { // constant
+                        } else if (Constants.TryGetValue(name, out var value)) { // constant
                             numbers.Add(value);
+                        } else if ((final = EvalConst?.Invoke(name)).HasValue) { // eval constant
+                            numbers.Add(final.Value);
                         } else { // constant, but it doesn't exist in the constant map
                             throw new NotImplementedException("Constant \"" + name + "\" does not exist.");
                         }

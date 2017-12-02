@@ -34,5 +34,23 @@ Instance instance = Instance.CreateScientificInstance();
 double result = instance.Evaluate("atan2(sqrt(3), 1) / PI * 180"); // 60
 Console.WriteLine("The result is: " + result);
 ```
+
+##### (Ex 4) Using the built-in scientific instance
+```C#
+Instance instance = new Instance {
+	EvalConst = name => {
+		return name.ToCharArray().Sum(c => c);
+	}//,
+	//EvalFunc = (name, args) => {
+	//    return 0; // return something of type: double?
+	//}
+};
+
+Func<string, double> eval = instance.Evaluate;
+
+// because the name ABC does not exist,
+// the function EvalConst in called (defined above)
+Console.WriteLine("Result: " + eval("ABC")); // ABC is 65+66+67=198
+```
 The scientific instance contains the standard math functions:
 **abs, ceiling, floor, round, rem, trunc, sqrt, sin, cos, tan, asin, acos, atan, atan2**, and of course the constants **PI** and **E**.
