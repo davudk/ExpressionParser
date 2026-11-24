@@ -35,15 +35,12 @@ double result = instance.Evaluate("atan2(sqrt(3), 1) / PI * 180"); // 60
 Console.WriteLine("The result is: " + result);
 ```
 
-##### (Ex 4) Using the built-in scientific instance
+##### (Ex 4) Resolving unknown constants
 ```C#
 Instance instance = new Instance {
 	EvalConst = name => {
 		return name.ToCharArray().Sum(c => c);
-	}//,
-	//EvalFunc = (name, args) => {
-	//    return 0; // return something of type: double?
-	//}
+	}
 };
 
 Func<string, double> eval = instance.Evaluate;
